@@ -43,3 +43,34 @@ st.write(f"**Arm Speed Selected:** {arm_speed_option}")
 st.write(f"**Wind Speed:** {wind_speed} mph")
 
 st.info("Next: Here you can integrate your trajectory calculation and visualization (next step).")
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Top-down trajectory plot
+def plot_flight_path(Cm, arm_speed='Intermediate (~55 mph)', wind_speed=0):
+    # Determine flight characteristics from pitching moment
+    # More negative Cm = more turn; more positive Cm = more fade
+
+    total_distance = 400  # Total throw distance in feet
+    steps = 100
+    x = np.linspace(0, total_distance, steps)
+
+    # Simulate lateral movement (curvature) based on Cm
+    # These are mock formulas; you'll improve them later with real dynamics
+    curvature_strength = Cm * 50  # scale Cm to curvature magnitude
+    y = curvature_strength * np.sin(np.linspace(0, np.pi, steps))
+
+    # Plot
+    fig, ax = plt.subplots(figsize=(5, 8))
+    ax.plot(y, x, color='orange', linewidth=3)
+    ax.set_title('Top-Down Flight Path')
+    ax.set_xlabel('Left ←     Lateral Position (ft)     → Right')
+    ax.set_ylabel('Forward Distance (ft)')
+    ax.set_xlim(-100, 100)
+    ax.set_ylim(0, 450)
+    ax.grid(True)
+    st.pyplot(fig)
+
+# Show the chart in Streamlit
+plot_flight_path(coefficients['Cm'], arm_speed_option, wind_speed)
