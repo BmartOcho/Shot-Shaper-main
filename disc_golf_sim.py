@@ -1,4 +1,7 @@
 import streamlit as st
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 # Import your extrapolation functions from earlier
 def improved_pitching_moment(turn, fade):
@@ -43,9 +46,6 @@ st.write(f"**Arm Speed Selected:** {arm_speed_option}")
 st.write(f"**Wind Speed:** {wind_speed} mph")
 
 st.info("Next: Here you can integrate your trajectory calculation and visualization (next step).")
-
-import matplotlib.pyplot as plt
-import numpy as np
 
 def get_arm_speed_mph(option):
     if "Beginner" in option:
