@@ -47,6 +47,8 @@ st.write(f"**Wind Speed:** {wind_speed} mph")
 
 st.info("Next: Here you can integrate your trajectory calculation and visualization (next step).")
 
+plot_flight_path(coefficients['Cm'], arm_speed_option, wind_speed)
+
 def get_arm_speed_mph(option):
     if "Beginner" in option:
         return 40
