@@ -47,23 +47,38 @@ st.info("Next: Here you can integrate your trajectory calculation and visualizat
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Top-down trajectory plot
-def plot_flight_path(Cm, arm_speed='Intermediate (~55 mph)', wind_speed=0):
-    # Determine flight characteristics from pitching moment
-    # More negative Cm = more turn; more positive Cm = more fade
+def get_arm_speed_mph(option):
+    if "Beginner" in option:
+        return 40
+    elif "Intermediate" in option:
+        return 55
+    elif "Expert" in option:
+        return 70
+    else:
+        return 55  # default
 
-    total_distance = 400  # Total throw distance in feet
+def plot_flight_path(Cm, arm_speed_option, wind_speed_mph):
+    # Set distance scaling based on arm speed
+    base_speed = 55  # baseline (Intermediate)
+    user_speed = get_arm_speed_mph(arm_speed_option)
+    distance_scale = user_speed / base_speed
+
+    # Simulate
+    total_distance = 325 * distance_scale  # base distance ~325ft
     steps = 100
     x = np.linspace(0, total_distance, steps)
 
-    # Simulate lateral movement (curvature) based on Cm
-    # These are mock formulas; you'll improve them later with real dynamics
-    curvature_strength = Cm * 50  # scale Cm to curvature magnitude
-    y = curvature_strength * np.sin(np.linspace(0, np.pi, steps))
+    # Curvature strength from Cm
+    curvature_strength = Cm * 50
+    y_curve = curvature_strength * np.sin(np.linspace(0, np.pi, steps))
+
+    # Wind drift (assume 1 ft drift per 5 mph crosswind for now)
+    wind_drift = (wind_speed_mph / 5.0)
+    y_total = y_curve + wind_drift
 
     # Plot
     fig, ax = plt.subplots(figsize=(5, 8))
-    ax.plot(y, x, color='orange', linewidth=3)
+    ax.plot(y_total, x, color='orange', linewidth=3)
     ax.set_title('Top-Down Flight Path')
     ax.set_xlabel('Left ←     Lateral Position (ft)     → Right')
     ax.set_ylabel('Forward Distance (ft)')
@@ -71,6 +86,3 @@ def plot_flight_path(Cm, arm_speed='Intermediate (~55 mph)', wind_speed=0):
     ax.set_ylim(0, 450)
     ax.grid(True)
     st.pyplot(fig)
-
-# Show the chart in Streamlit
-plot_flight_path(coefficients['Cm'], arm_speed_option, wind_speed)
