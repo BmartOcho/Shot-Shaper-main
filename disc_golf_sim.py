@@ -58,28 +58,38 @@ def get_arm_speed_mph(option):
         return 55  # default
 
 def plot_flight_path(Cm, arm_speed_option, wind_speed_mph):
-    # Set distance scaling based on arm speed
-    base_speed = 55  # baseline (Intermediate)
+    base_speed = 55
     user_speed = get_arm_speed_mph(arm_speed_option)
     distance_scale = user_speed / base_speed
 
-    # Simulate
-    total_distance = 325 * distance_scale  # base distance ~325ft
+    total_distance = 325 * distance_scale
     steps = 100
     x = np.linspace(0, total_distance, steps)
 
-    # Curvature strength from Cm
-    curvature_strength = Cm * 50
-    y_curve = curvature_strength * np.sin(np.linspace(0, np.pi, steps))
+    # Determine phase split for turn vs fade (e.g., 75% turn, 25% fade)
+    fade_split = int(steps * 0.75)
+    turn_phase = np.linspace(0, np.pi, fade_split)
+    fade_phase = np.linspace(0, np.pi, steps - fade_split)
 
-    # Wind drift (assume 1 ft drift per 5 mph crosswind for now)
-    wind_drift = (wind_speed_mph / 5.0)
-    y_total = y_curve + wind_drift
+    # Calculate turn curve (gentle)
+    curvature_strength_turn = Cm * 50
+    y_turn = curvature_strength_turn * np.sin(turn_phase)
+
+    # Calculate fade curve (sharper curve back)
+    fade_force = 30  # tweak this value for more or less visual fade
+    y_fade = y_turn[-1] + fade_force * (1 - np.cos(fade_phase))  # fade curves harder
+
+    # Combine the two lateral curves
+    y_total = np.concatenate((y_turn, y_fade))
+
+    # Apply wind drift
+    wind_drift = wind_speed_mph / 5.0
+    y_total += wind_drift
 
     # Plot
     fig, ax = plt.subplots(figsize=(5, 8))
     ax.plot(y_total, x, color='orange', linewidth=3)
-    ax.set_title('Top-Down Flight Path')
+    ax.set_title('Top-Down Flight Path with Fade')
     ax.set_xlabel('Left ←     Lateral Position (ft)     → Right')
     ax.set_ylabel('Forward Distance (ft)')
     ax.set_xlim(-100, 100)
